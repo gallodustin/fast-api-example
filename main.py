@@ -45,10 +45,22 @@ def create_posts(post: Post, status_code=status.HTTP_201_CREATED):
     my_posts.append(post_dict)
     return {'data': post_dict}
 
-@app.delete('/posts/{id}')
+@app.delete('/posts/{id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id: int):
     found_post = find_post(id)
     if not found_post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'post {id} was not found.')
     my_posts.remove(found_post)
     return {'message': f'post {id} was deleted.'}
+
+@app.put('/posts/{id}')
+def update_post(id: int, post: Post):
+    print(post)
+    found_post = find_post(id)
+    if not found_post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'post {id} was not found.')
+    found_post['title'] = post.title
+    found_post['content'] = post.content
+    found_post['published'] = post.published
+    found_post['rating'] = post.rating
+    return {'message': 'post updated.'}
