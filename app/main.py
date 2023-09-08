@@ -1,18 +1,12 @@
 from fastapi import FastAPI, HTTPException, Response, status, Depends
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from . import models
+from . import models, schemas
 from .database import engine, get_db
 
 models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
-
-class Post(BaseModel):
-    title: str
-    content: str
-    published: bool = True
 
 try:
     # in a real app you shouldn't hardcode this
@@ -50,7 +44,7 @@ def get_post(id: int, db: Session = Depends(get_db)):
     return {'data': post}
 
 @app.post('/posts', status_code=status.HTTP_201_CREATED)
-def create_posts(post: Post, db: Session = Depends(get_db)):
+def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
     # passing as f string here would be bad because it allows sql injection
     # cursor.execute() checks for this before doing the substitution
     # cursor.execute('INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING *;', (post.title, post.content, post.published))
@@ -74,7 +68,7 @@ def delete_post(id: int, db: Session = Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @app.put('/posts/{id}')
-def update_post(id: int, post: Post, db: Session = Depends(get_db)):
+def update_post(id: int, post: schemas.PostCreate, db: Session = Depends(get_db)):
     # cursor.execute('UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING *;', (post.title, post.content, post.published, str(id)))
     # updated_post = cursor.fetchone()
     updated_post_query = db.query(models.Post).filter(models.Post.id == id)
