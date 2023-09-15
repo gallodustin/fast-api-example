@@ -1,6 +1,8 @@
-from sqlalchemy import Boolean, Column, Integer, String, TIMESTAMP
+from sqlalchemy import TIMESTAMP, Boolean, Column, Integer, String
 from sqlalchemy.sql.expression import text
+
 from .database import Base
+
 
 # When you update something below, that's a schema update aka migration. You should handle this with Alembic.
 # SQLAlchemy won't magically update the table if it exists already

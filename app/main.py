@@ -1,11 +1,15 @@
-from fastapi import FastAPI, HTTPException, Response, status, Depends
-import psycopg2
-from psycopg2.extras import RealDictCursor
-from sqlalchemy.orm import Session
-from . import models, schemas
-from .database import engine, get_db
 from typing import List
 
+import psycopg2
+from fastapi import Depends, FastAPI, HTTPException, Response, status
+from passlib.context import CryptContext
+from psycopg2.extras import RealDictCursor
+from sqlalchemy.orm import Session
+
+from . import models, schemas
+from .database import engine, get_db
+
+pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
@@ -47,6 +51,7 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
     new_post = models.Post(**post.model_dump())
     db.add(new_post) # add the new post to the session
     db.commit() # commit the session to the DB
+    db.refresh(new_post) # refresh the session to get the new post
     return new_post
 
 @app.delete('/posts/{id}', status_code=status.HTTP_204_NO_CONTENT)
@@ -73,3 +78,15 @@ def update_post(id: int, post: schemas.PostCreate, db: Session = Depends(get_db)
     updated_post_query.update(post.model_dump(), synchronize_session=False)
     db.commit()
     return updated_post
+
+@app.post('/users', status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+
+    # hash the password
+    user.password = pwd_context.hash(user.password)
+
+    new_user = models.User(**user.model_dump())
+    db.add(new_user) # add the new post to the session
+    db.commit() # commit the session to the DB
+    db.refresh(new_user) # refresh the session to get the new user
+    return new_user
