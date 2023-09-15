@@ -1,9 +1,9 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, EmailStr
 
 
-# Will be useful later as a base class for different requests using a Post
 class PostBase(BaseModel):
     title: str
     content: str
@@ -22,7 +22,7 @@ class PostResponse(PostBase):
     created_at: datetime
 
     class Config:
-        orm_mode = True  # so that we can use SQLAlchemy models with Pydantic which normally uses dict
+        orm_mode = True
 
 
 class UserCreate(BaseModel):
@@ -42,3 +42,12 @@ class UserOut(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    user_id: Optional[int]
