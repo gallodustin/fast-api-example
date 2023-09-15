@@ -9,8 +9,10 @@ class PostBase(BaseModel):
     content: str
     published: bool = True
 
+
 class PostCreate(PostBase):
     pass
+
 
 class PostResponse(PostBase):
     id: int
@@ -19,17 +21,19 @@ class PostResponse(PostBase):
     published: bool
     created_at: datetime
 
-    class Config: 
-        orm_mode = True # so that we can use SQLAlchemy models with Pydantic which normally uses dict
+    class Config:
+        orm_mode = True  # so that we can use SQLAlchemy models with Pydantic which normally uses dict
+
 
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
 
+
 class UserOut(BaseModel):
     id: int
     email: EmailStr
     created_at: datetime
-    
+
     class Config:
         orm_mode = True
